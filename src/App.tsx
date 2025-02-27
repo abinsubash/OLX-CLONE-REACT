@@ -1,12 +1,11 @@
 import Home from "./Components/Home/Home"
-import Navbar from "./Components/Navbar/Navbar"
-import Productpge from "./Components/Product/Productpge"
+import ProductDetialpge from "./Components/Product/ProductDetialpge"
 function App() {
 
   return (
     <>
-     {/* <Home/> */}
-     <Productpge/>
+     <Home/>
+     {/* <ProductDetialpge/> */}
     </>
   )
 }
