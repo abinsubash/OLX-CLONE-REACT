@@ -3,35 +3,30 @@ import search from "../../assets/search.svg";
 import setll from "../../assets/addButton.png";
 import arrowDown from "../../assets/arrow-down.svg";
 import { useModal } from "../Context/ModalContext";
-import Cookies from "js-cookie";
-import { useState, useEffect } from "react";
-import { auth } from "../../Config/firebase"; 
-import { signOut, onAuthStateChanged, User } from "firebase/auth";
+import { useEffect, useState } from "react";
+import Cookies from 'js-cookie'
+import {useAuth} from "../Context/UserexistContext"
 
 const Navbar: React.FC = () => {
   const { setLoginModal, setSellModal } = useModal();
-  const [user, setUser] = useState<User | null>(null);
+  const {setUser, user} = useAuth();
 
+  // Check for userId in cookies when component mounts
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        Cookies.set("user", JSON.stringify(currentUser));
-        setUser(currentUser);
-      } else {
-        Cookies.remove("user");
-        setUser(null);
-      }
-    });
+    const userId = Cookies.get("userId");
+    if (userId) {
+      setUser(true);
+    } else {
+      setUser(false);
+    }
+  }, [setUser]);
 
-    return () => unsubscribe(); 
-  }, []);
-
-  const handleLogout = async () => {
+  const handleLogout = () => {
     try {
-      await signOut(auth);
-      Cookies.remove("user");
-      setUser(null);
-      
+      Cookies.remove("userId");
+      setUser(false);
+      // Optional: Clear localStorage data if needed
+      // localStorage.removeItem('userData');
     } catch (error) {
       console.error("Logout failed", error);
     }
@@ -58,7 +53,7 @@ const Navbar: React.FC = () => {
             <img className="w-5 ml-3 mt-1" src={arrowDown} alt="Dropdown" />
           </div>
 
-          {user ? (
+          {Cookies.get("userId") || user ? (
             <div
               className="ml-5 w-16 h-10 text-red-600 flex items-center justify-center font-bold underline hover:text-red-800 cursor-pointer"
               onClick={handleLogout}
@@ -76,11 +71,23 @@ const Navbar: React.FC = () => {
 
           <div
             className="ml-4 w-23 h-15 items-center justify-center cursor-pointer"
-            onClick={() => setSellModal(true)}
-          >
+            onClick={Cookies.get("userId") ? () => setSellModal(true) : () => setLoginModal(true)}
+            >
             <img className="mt-2" src={setll} alt="Sell" />
           </div>
         </div>
+      </div>
+      <div className="flex items-center justify-between px-10  bg-gray-100">
+        <p className="font-semibold cursor-pointer">ALL CATEGORIES</p>
+        <ul className="flex space-x-6 text-sm">
+          <li className="cursor-pointer">Cars</li>
+          <li className="cursor-pointer">Motorcycles</li>
+          <li className="cursor-pointer">Mobile Phones</li>
+          <li className="cursor-pointer">For Sale: Houses & Apartments</li>
+          <li className="cursor-pointer">Scooters</li>
+          <li className="cursor-pointer">Commercial & Other Vehicles</li>
+          <li className="cursor-pointer">For Rent: Houses & Apartments</li>
+        </ul>
       </div>
     </div>
   );

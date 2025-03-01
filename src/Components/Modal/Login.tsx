@@ -2,25 +2,33 @@ import Google from "../../assets/google.png";
 import Mobile from "../../assets/mobile.svg";
 import Heart from "../../assets/love.png";
 import { useModal } from "../Context/ModalContext";
-import { auth, provider } from "../../Config/firebase.tsx";
-import { signInWithPopup } from "firebase/auth";
-import Cookies from "js-cookie";
-
+import { auth, provider} from "../Config/Firebase.tsx";
+import { signInWithPopup } from 'firebase/auth'
+import Cookies from "js-cookie"
+import { useAuth } from "../Context/UserexistContext.tsx";
 const Modal = () => {
   const { setLoginModal } = useModal();
+  const {user,setUser}  = useAuth()
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
-      Cookies.set("user", JSON.stringify(user), { expires: 7 });
-
-      console.log("User Info Stored in Cookies:", user);
-      setLoginModal(false)
+      // Store both userId and email in cookies
+      Cookies.set("userId", user.uid, { expires: 7 }); 
+      Cookies.set("userEmail", user.email, { expires: 7 });
+      
+      console.log('User ID:', Cookies.get('userId'));
+      console.log('User Email:', Cookies.get('userEmail'));
+      
+      setLoginModal(false);
+      setUser(true);
     } catch (error) {
-      console.error("Login failed", error);
+      console.error("Error signing in:", error);
+      alert(error);
     }
   };
+  
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 backdrop-brightness-50">
@@ -47,7 +55,7 @@ const Modal = () => {
               phone
             </button>
             <button
-              className="w-full border-1 border-black  py-2 px-3 rounded mb-2 flex  hover:border-green-950 hover:text-green-950 cursor-pointer"
+              className="w-full border-1 border-black py-2 px-3 rounded mb-2 flex hover:border-green-950 hover:text-green-950 cursor-pointer"
               onClick={handleGoogleLogin}
             >
               <img src={Google} alt="Google Icon" className="mr-2 w-6 h-6" />

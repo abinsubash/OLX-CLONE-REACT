@@ -1,8 +1,52 @@
-import React, { useState } from "react";
+import React, { createContext, useContext, useState } from 'react';
 import { useModal } from "../Context/ModalContext";
-import Cookies from "js-cookie"; // Add this import at the top
-import { useProducts } from '../Context/ProductContext';
-import { toast } from 'react-hot-toast';
+import Cookies from "js-cookie";
+
+interface Product {
+  id: number;
+  title: string;
+  price: string;
+  imageUrl: string;
+  category: string;
+  description: string;
+  createdAt: string;
+  userId: string;
+}
+
+interface ProductContextType {
+  products: Product[];
+  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  addProduct: (product: Product) => void;
+}
+
+const ProductContext = createContext<ProductContextType | undefined>(undefined);
+
+export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [products, setProducts] = useState<Product[]>(() => {
+    const storedProducts = localStorage.getItem('products');
+    return storedProducts ? JSON.parse(storedProducts) : [];
+  });
+
+  const addProduct = (product: Product) => {
+    const updatedProducts = [...products, product];
+    setProducts(updatedProducts);
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
+  };
+
+  return (
+    <ProductContext.Provider value={{ products, setProducts, addProduct }}>
+      {children}
+    </ProductContext.Provider>
+  );
+};
+
+export const useProducts = () => {
+  const context = useContext(ProductContext);
+  if (!context) {
+    throw new Error('useProducts must be used within a ProductProvider');
+  }
+  return context;
+};
 
 const Sell = () => {
   const { setSellModal } = useModal();
@@ -26,7 +70,6 @@ const Sell = () => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setImage(selectedFile);
-      
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
@@ -37,28 +80,28 @@ const Sell = () => {
 
   const handleSubmit = async () => {
     if (!previewUrl) {
-      toast.error("Please select an image first!");
+      alert("Please select an image first!");
       return;
     }
     
     if (!formData.title || !formData.category || !formData.price || !formData.description) {
-      toast.error("Please fill in all fields!");
+      alert("Please fill in all fields!");
       return;
     }
     
     if (isNaN(Number(formData.price))) {
-      toast.error("Price must be a number!");
+      alert("Price must be a number!");
       return;
     }
 
     const userId = Cookies.get('userId');
     if (!userId) {
-      toast.error("Please login first!");
+      alert("Please login first!");
       return;
     }
 
     setLoading(true);
-    
+
     try {
       const productData = {
         ...formData,
@@ -69,11 +112,11 @@ const Sell = () => {
       };
 
       addProduct(productData);
-      toast.success("Item listed successfully!");
+      alert("Item listed successfully!");
       setSellModal(false);
     } catch (error) {
       console.error("Error saving product:", error);
-      toast.error("Failed to list your item. Please try again.");
+      alert("Failed to list your item. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -90,7 +133,6 @@ const Sell = () => {
           &times;
         </button>
         <h2 className="text-2xl font-semibold mb-4 text-center">Sell Item</h2>
-
         <input
           type="text"
           name="title"
@@ -100,7 +142,6 @@ const Sell = () => {
           className="w-full border-2 rounded-md p-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
           disabled={loading}
         />
-
         <input
           type="text"
           name="category"
@@ -110,7 +151,6 @@ const Sell = () => {
           className="w-full border-2 rounded-md p-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
           disabled={loading}
         />
-
         <input
           type="text"
           name="price"
@@ -120,7 +160,6 @@ const Sell = () => {
           className="w-full border-2 rounded-md p-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
           disabled={loading}
         />
-
         <textarea
           name="description"
           placeholder="Description"
@@ -129,7 +168,6 @@ const Sell = () => {
           className="w-full border-2 rounded-md p-2 mb-3 h-24 focus:outline-none focus:ring-2 focus:ring-blue-400"
           disabled={loading}
         ></textarea>
-
         <div className="w-full border-2 border-dashed border-gray-300 rounded-md p-4 text-center h-40 cursor-pointer hover:bg-gray-50 relative flex items-center justify-center">
           <input
             type="file"
@@ -146,7 +184,6 @@ const Sell = () => {
             )}
           </div>
         </div>
-
         <button
           onClick={handleSubmit}
           className="w-full bg-green-950 text-white py-2 rounded-md mt-4 hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed"

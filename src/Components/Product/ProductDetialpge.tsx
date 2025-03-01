@@ -1,7 +1,57 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Navbar from "../Navbar/Navbar";
+import Cookies from 'js-cookie';
+
+interface Product {
+  id: number;
+  title: string;
+  price: string;
+  imageUrl: string;
+  description: string;
+  category: string;
+  createdAt: string;
+  userId: string;
+}
 
 const ProductPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    const fetchProduct = () => {
+      const storedProducts = localStorage.getItem('products');
+      if (storedProducts) {
+        const products = JSON.parse(storedProducts);
+        const foundProduct = products.find((p: Product) => p.id === Number(id));
+        setProduct(foundProduct || null);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  const formatUserEmail = (userId: string) => {
+    // Get the email from cookies based on userId
+    const userEmail = Cookies.get('userEmail');
+    if (userEmail) {
+      // Remove @gmail.com from the email
+      return userEmail.replace('@gmail.com', '');
+    }
+    return userId; // Fallback to userId if email not found
+  };
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <p>Product not found</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar/>
@@ -11,37 +61,36 @@ const ProductPage = () => {
             <div className="w-full md:w-2/3 p-4">
               <div className="bg-gray-200 rounded-lg h-96 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/api/placeholder/600/400" 
-                  alt="Car" 
+                  src={product.imageUrl}
+                  alt={product.title}
                   className="w-full h-full object-cover"
                 />
-              </div>
-              <div className="flex space-x-2 mt-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-md overflow-hidden">
-                  <img src="/api/placeholder/100/100" alt="Thumbnail" className="w-full h-full object-cover" />
-                </div>
               </div>
             </div>
             <div className="w-full md:w-1/3 p-6 border-l">
               <div className="mb-8">
-                <div className="text-3xl font-bold">₹ 1,000,000</div>
-                <div className="text-gray-500 mt-1">2022 Kia Seltos HTX Plus Diesel</div>
+                <div className="text-3xl font-bold">₹ {product.price}</div>
+                <div className="text-gray-500 mt-1">{product.title}</div>
                 <div className="flex items-center mt-4 text-sm text-gray-500">
-                  <span>Port Blair, Andaman & Nicobar Islands</span>
+                  <span>{product.category}</span>
                   <span className="mx-2">•</span>
-                  <span>Posted on Feb 19, 2025</span>
+                  <span>Posted on {new Date(product.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
               
               <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-2">Seller Description</h3>
+                <h3 className="text-xl font-semibold mb-2">Description</h3>
+                <p className="text-gray-700">{product.description}</p>
+              </div>
+              
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-2">Seller Information</h3>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-xl font-bold">
-                    V
+                    {formatUserEmail(product.userId).charAt(0).toUpperCase()}
                   </div>
                   <div className="ml-3">
-                    <div className="font-semibold">Vishnu VP</div>
-                    <div className="text-sm text-gray-500">Member since Nov 2024</div>
+                    <div className="font-semibold">{formatUserEmail(product.userId)}</div>
                   </div>
                 </div>
               </div>
