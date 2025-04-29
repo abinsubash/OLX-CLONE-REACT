@@ -1,20 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Navbar from "../Navbar/Navbar";
 import Login from "../Modal/Login";
 import Sell from "../Modal/Sell";
 import { useModal } from "../Context/ModalContext";
-import { auth } from "../Config/Firebase";
 import { useNavigate } from 'react-router-dom';
-import { useProducts } from "../Context/ProductContext"; // Add this import
-
-interface Product {
-  id: number;
-  title: string;
-  price: string;
-  imageUrl: string;
-  createdAt: string;
-  userId: string;
-}
+import { useProducts } from "../Context/ProductContext";
 
 const Home: React.FC = () => {
   const { loginModal, sellModal } = useModal();

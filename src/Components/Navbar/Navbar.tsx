@@ -3,9 +3,10 @@ import search from "../../assets/search.svg";
 import setll from "../../assets/addButton.png";
 import arrowDown from "../../assets/arrow-down.svg";
 import { useModal } from "../Context/ModalContext";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Cookies from 'js-cookie'
 import {useAuth} from "../Context/UserexistContext"
+import React from 'react';
 
 const Navbar: React.FC = () => {
   const { setLoginModal, setSellModal } = useModal();

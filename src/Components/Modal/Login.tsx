@@ -8,7 +8,7 @@ import Cookies from "js-cookie"
 import { useAuth } from "../Context/UserexistContext.tsx";
 const Modal = () => {
   const { setLoginModal } = useModal();
-  const {user,setUser}  = useAuth()
+  const {setUser}  = useAuth()
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
