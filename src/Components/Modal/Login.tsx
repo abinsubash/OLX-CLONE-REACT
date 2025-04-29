@@ -13,12 +13,11 @@ const Modal = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      // Store both userId and email in cookies
-      Cookies.set("userId", user.uid, { expires: 7 }); 
-      Cookies.set("userEmail", user.email, { expires: 7 });
-      
-      console.log('User ID:', Cookies.get('userId'));
-      console.log('User Email:', Cookies.get('userEmail'));
+      // Only set cookies if email exists
+      if (user.email) {
+        Cookies.set("userId", user.uid, { expires: 7 }); 
+        Cookies.set("userEmail", user.email, { expires: 7 });
+      }
       
       setLoginModal(false);
       setUser(true);

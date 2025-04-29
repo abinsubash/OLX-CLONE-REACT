@@ -14,7 +14,6 @@ const Sell = () => {
     description: "",
   });
 
-  const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -25,7 +24,6 @@ const Sell = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      setImage(selectedFile);
       
       const reader = new FileReader();
       reader.onloadend = () => {
